@@ -14,6 +14,7 @@ export default tseslint.config(
       "src/routeTree.gen.ts",
       "src/graphql/generated/**",
       "public/mockServiceWorker.js",
+      ".remember/**",
     ],
   },
   {
