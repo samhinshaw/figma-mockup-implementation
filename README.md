@@ -20,39 +20,39 @@ pnpm dev          # Vite dev server  → http://localhost:5173
 
 Other scripts:
 
-| Script                   | What it does                                            |
-| ------------------------ | ------------------------------------------------------- |
-| `pnpm dev`               | Start the Vite dev server                               |
-| `pnpm build`             | Type-check (`tsc -b`) then production build with Vite   |
-| `pnpm preview`           | Preview the production build                            |
-| `pnpm lint`              | Run ESLint                                              |
-| `pnpm format`            | Format with Prettier                                    |
-| `pnpm codegen`           | Generate typed GraphQL operations (see GraphQL section) |
-| `pnpm storybook`         | Run Storybook on port 6006                              |
-| `pnpm build-storybook`   | Build the static Storybook                              |
+| Script                 | What it does                                            |
+| ---------------------- | ------------------------------------------------------- |
+| `pnpm dev`             | Start the Vite dev server                               |
+| `pnpm build`           | Type-check (`tsc -b`) then production build with Vite   |
+| `pnpm preview`         | Preview the production build                            |
+| `pnpm lint`            | Run ESLint                                              |
+| `pnpm format`          | Format with Prettier                                    |
+| `pnpm codegen`         | Generate typed GraphQL operations (see GraphQL section) |
+| `pnpm storybook`       | Run Storybook on port 6006                              |
+| `pnpm build-storybook` | Build the static Storybook                              |
 
 ---
 
 ## Tech stack
 
-| Concern              | Choice                                                                 |
-| -------------------- | --------------------------------------------------------------------- |
-| Build / dev server   | **Vite 6** + `@vitejs/plugin-react`                                    |
-| Language             | **TypeScript** (strict), `@/*` path alias → `src/*`                    |
-| UI runtime           | **React 19**                                                          |
-| Styling              | **Tailwind CSS v4** (via `@tailwindcss/vite`)                          |
-| Component library    | **shadcn/ui** (`radix-nova` preset, neutral, CSS variables)           |
-| Extra components     | **DiceUI** (composable shadcn-style data components)                   |
-| Primitives           | **Radix UI** (`radix-ui` unified package)                              |
-| Data fetching        | **TanStack Query** (React Query)                                       |
-| GraphQL              | **graphql-request** client + **GraphQL Code Generator** (typed ops)   |
-| Routing              | **TanStack Router**                                                   |
-| Tables               | **TanStack Table**                                                    |
-| Forms + validation   | **TanStack Form** + **Zod**                                            |
-| Client state         | **Zustand**                                                          |
-| Charts               | **Recharts** (shadcn charts) + **Visx** (custom viz)                  |
-| Component workshop    | **Storybook** (react-vite builder)                                    |
-| Linting / formatting  | **ESLint** + **Prettier**                                             |
+| Concern              | Choice                                                              |
+| -------------------- | ------------------------------------------------------------------- |
+| Build / dev server   | **Vite 6** + `@vitejs/plugin-react`                                 |
+| Language             | **TypeScript** (strict), `@/*` path alias → `src/*`                 |
+| UI runtime           | **React 19**                                                        |
+| Styling              | **Tailwind CSS v4** (via `@tailwindcss/vite`)                       |
+| Component library    | **shadcn/ui** (`radix-nova` preset, neutral, CSS variables)         |
+| Extra components     | **DiceUI** (composable shadcn-style data components)                |
+| Primitives           | **Radix UI** (`radix-ui` unified package)                           |
+| Data fetching        | **TanStack Query** (React Query)                                    |
+| GraphQL              | **graphql-request** client + **GraphQL Code Generator** (typed ops) |
+| Routing              | **TanStack Router**                                                 |
+| Tables               | **TanStack Table**                                                  |
+| Forms + validation   | **TanStack Form** + **Zod**                                         |
+| Client state         | **Zustand**                                                         |
+| Charts               | **Recharts** (shadcn charts) + **Visx** (custom viz)                |
+| Component workshop   | **Storybook** (react-vite builder)                                  |
+| Linting / formatting | **ESLint** + **Prettier**                                           |
 
 Stack decisions (resolved with the requester):
 
@@ -75,19 +75,23 @@ src/
     charts/      # Recharts / Visx chart wrappers
     layout/      # app shell: sidebar, header
     dashboard/   # Dashboard-specific sections (hero, stat cards, table, charts)
-  routes/        # TanStack Router route tree
+  routes/        # TanStack Router route tree (__root.tsx, index.tsx)
   lib/           # cn() util, graphql client, query client
   graphql/       # .graphql operations + generated/ types
   stores/        # Zustand stores
   hooks/         # shared hooks
   styles/
     globals.css  # Tailwind v4 entry + theme tokens
-  App.tsx        # placeholder page (replace during implementation)
-  main.tsx       # React entry
+  main.tsx       # React entry (Query + Router providers)
+  routeTree.gen.ts # generated by the router plugin
 components.json  # shadcn/ui config
 codegen.ts       # GraphQL Code Generator config
+eslint.config.js # ESLint flat config
 .storybook/      # Storybook config
 ```
+
+The placeholder page is the index route (`src/routes/index.tsx`). Replace it
+with the real Dashboard during implementation.
 
 ---
 
@@ -141,3 +145,6 @@ Progress is committed incrementally. See git history for each step.
   `src/graphql/generated/`.
 - **Tables / forms** — TanStack Table, TanStack Form (with Zod).
 - **Charts** — shadcn `chart` (Recharts) component; Visx packages installed.
+- **Lint / format** — ESLint flat config (typescript-eslint, react-hooks,
+  react-refresh) + Prettier (with Tailwind class sorting). `pnpm lint` clean;
+  `pnpm format` normalizes the tree.

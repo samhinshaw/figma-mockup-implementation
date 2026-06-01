@@ -10,14 +10,18 @@ type Query {
   salesOverview: [TimeseriesPoint!]!
 }
 
-"""Headline metrics shown in the dashboard stat cards."""
+"""
+Headline metrics shown in the dashboard stat cards.
+"""
 type DashboardStats {
   websiteViews: Int!
   dailySales: Float!
   completedTasks: Int!
 }
 
-"""A row in the Projects table."""
+"""
+A row in the Projects table.
+"""
 type Project {
   id: ID!
   name: String!
@@ -32,7 +36,9 @@ type Member {
   avatarUrl: String
 }
 
-"""A single point in a time-series chart (e.g. Sales Overview)."""
+"""
+A single point in a time-series chart (e.g. Sales Overview).
+"""
 type TimeseriesPoint {
   label: String!
   value: Float!
