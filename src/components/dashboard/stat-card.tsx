@@ -5,7 +5,7 @@ export function StatCard({ widget }: { widget: StatWidget }) {
   return (
     <div className="card-lift flex h-full flex-col gap-4 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/5">
       <div>
-        <h3 className="text-base font-semibold leading-tight text-brand-title">
+        <h3 className="text-base leading-tight font-semibold text-brand-title">
           {widget.title}
         </h3>
         <p className="text-sm text-brand-body">{widget.subtitle}</p>
@@ -19,8 +19,10 @@ export function StatCard({ widget }: { widget: StatWidget }) {
       </div>
       <div className="border-t border-brand-hairline pt-3">
         <div className="flex items-center gap-2">
-          <span className="size-2 rounded-full bg-brand-green" />
-          <span className="text-sm text-brand-body">{widget.status}</span>
+          <span className="size-2 shrink-0 rounded-full bg-brand-green" />
+          <span className="min-w-0 truncate text-xs text-brand-body">
+            {widget.status}
+          </span>
         </div>
       </div>
     </div>
