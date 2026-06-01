@@ -1,7 +1,9 @@
 import type {
+  BrandKey,
   HeroContent,
   OrdersOverview,
   Project,
+  ProjectTeam,
   QuarterPoint,
   SalesExpensesPoint,
   StatWidget,
@@ -101,7 +103,7 @@ export const mockOrdersOverview: OrdersOverview = {
   trendLabel: "+24% this month",
 };
 
-export const mockProjects: Project[] = [
+const baseProjects: Project[] = [
   {
     id: "p1",
     name: "Material Figma Version",
@@ -169,6 +171,97 @@ export const mockProjects: Project[] = [
     team: "Marketing",
     completion: 50,
   },
+];
+
+// Deterministic pools used to spread out the project list. No randomness so
+// every render produces the same rows (stable across reloads and snapshots).
+const PROJECT_NAME_POOL = [
+  "Redesign Marketing Site",
+  "Migrate to Design Tokens",
+  "Build Component Library",
+  "Refactor Auth Flow",
+  "Ship Dark Mode",
+  "Optimize Bundle Size",
+  "Add Audit Logging",
+  "Revamp Onboarding",
+  "Integrate Payments",
+  "Improve Search Relevance",
+  "Localize Checkout",
+  "Modernize CI Pipeline",
+  "Rework Notifications",
+  "Consolidate Dashboards",
+  "Harden API Gateway",
+  "Roll Out Feature Flags",
+  "Automate Release Notes",
+  "Upgrade Component Themes",
+  "Polish Mobile Nav",
+  "Tune Database Indexes",
+  "Draft Brand Guidelines",
+  "Launch Referral Program",
+  "Instrument Analytics",
+  "Prototype AI Assistant",
+];
+
+const MEMBER_NAME_POOL = [
+  "Amara Okafor",
+  "Liam Chen",
+  "Sofia Rossi",
+  "Devin Brooks",
+  "Priya Nair",
+  "Mateo Garcia",
+  "Hana Kim",
+  "Noah Williams",
+  "Yuki Tanaka",
+  "Zara Ahmed",
+  "Owen Patel",
+  "Camila Santos",
+  "Ravi Desai",
+  "Elena Petrova",
+  "Kofi Mensah",
+  "Mei Lin",
+];
+
+const LOGO_POOL: BrandKey[] = ["figma", "github", "discord", "slack"];
+const TEAM_POOL: ProjectTeam[] = [
+  "Design",
+  "Development",
+  "Back-End",
+  "Marketing",
+];
+
+/** Build `count` synthetic projects, numbered from `startNumber` (e.g. p6…). */
+function generateProjects(count: number, startNumber: number): Project[] {
+  return Array.from({ length: count }, (_, i) => {
+    const number = startNumber + i;
+    const memberCount = 2 + (i % 3); // 2–4 members
+    const memberStart = (i * 2) % MEMBER_NAME_POOL.length;
+    const members = Array.from({ length: memberCount }, (_, k) => ({
+      id: `p${number}-m${k + 1}`,
+      name: MEMBER_NAME_POOL[(memberStart + k) % MEMBER_NAME_POOL.length],
+    }));
+    const wrap = Math.floor(i / PROJECT_NAME_POOL.length);
+    const baseName = PROJECT_NAME_POOL[i % PROJECT_NAME_POOL.length];
+    return {
+      id: `p${number}`,
+      name: wrap === 0 ? baseName : `${baseName} ${wrap + 1}`,
+      logo: LOGO_POOL[i % LOGO_POOL.length],
+      team: TEAM_POOL[(i * 3 + 1) % TEAM_POOL.length],
+      budget: (((i * 7 + 3) % 25) + 1) * 1000, // 1,000–25,000
+      completion: ((i * 13 + 5) % 11) * 10, // 0–100, in steps of 10
+      members,
+    };
+  });
+}
+
+/**
+ * The full project list the table renders: the five canonical Figma fixtures
+ * above (so page 1 matches the design), plus a deterministic spread to 48 total
+ * — 10 pages of 5 — so paging, sorting, and the team filter have real data to
+ * work with.
+ */
+export const mockProjects: Project[] = [
+  ...baseProjects,
+  ...generateProjects(43, 6),
 ];
 
 /** Headline figure shown on the Sales vs Expenses chart. */

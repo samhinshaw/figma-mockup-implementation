@@ -5,18 +5,30 @@ import {
   Plus,
   SlidersHorizontal,
 } from "lucide-react";
-
-import { BrandLogo } from "@/components/brand-logos";
 import {
-  Avatar,
-  AvatarFallback,
-  AvatarGroup,
-  AvatarImage,
-} from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+  flexRender,
+  getCoreRowModel,
+  getFilteredRowModel,
+  getPaginationRowModel,
+  getSortedRowModel,
+  useReactTable,
+  type ColumnFiltersState,
+  type PaginationState,
+  type RowSelectionState,
+  type SortingState,
+} from "@tanstack/react-table";
+
+import { projectsColumns } from "@/components/dashboard/projects-columns";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Progress } from "@/components/ui/progress";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   Table,
@@ -27,76 +39,11 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useProjects } from "@/data/queries";
-import type { Project } from "@/data/types";
-import { personaAvatar } from "@/lib/avatars";
-import { formatCurrency } from "@/lib/format";
+import type { ProjectTeam } from "@/data/types";
+import { cn } from "@/lib/utils";
 
-const HEAD_CLASS = "text-xs tracking-wide text-brand-body uppercase";
-
-function getInitials(name: string): string {
-  return name
-    .split(" ")
-    .map((part) => part[0] ?? "")
-    .slice(0, 2)
-    .join("")
-    .toUpperCase();
-}
-
-function ProjectRow({
-  project,
-  selected,
-  onToggle,
-}: {
-  project: Project;
-  selected: boolean;
-  onToggle: (id: string) => void;
-}) {
-  return (
-    <TableRow>
-      <TableCell className="pl-6">
-        <Checkbox
-          checked={selected}
-          onCheckedChange={() => onToggle(project.id)}
-          aria-label={`Select ${project.name}`}
-        />
-      </TableCell>
-      <TableCell>
-        <div className="flex items-center gap-3">
-          <BrandLogo brand={project.logo} className="size-5" />
-          <span className="text-brand-title text-sm font-medium">
-            {project.name}
-          </span>
-        </div>
-      </TableCell>
-      <TableCell>
-        <AvatarGroup>
-          {project.members.map((member) => (
-            <Avatar key={member.id} size="sm">
-              <AvatarImage src={personaAvatar(member.name)} alt={member.name} />
-              <AvatarFallback>{getInitials(member.name)}</AvatarFallback>
-            </Avatar>
-          ))}
-        </AvatarGroup>
-      </TableCell>
-      <TableCell className="text-brand-body text-sm tabular-nums">
-        {formatCurrency(project.budget)}
-      </TableCell>
-      <TableCell>
-        <Badge variant="outline" className="rounded-md font-medium">
-          {project.team}
-        </Badge>
-      </TableCell>
-      <TableCell className="pr-6">
-        <div className="flex flex-col gap-1.5">
-          <span className="text-brand-body text-xs tabular-nums">
-            {project.completion}%
-          </span>
-          <Progress value={project.completion} className="h-1.5 w-28" />
-        </div>
-      </TableCell>
-    </TableRow>
-  );
-}
+const PAGE_SIZE = 5;
+const TEAMS: ProjectTeam[] = ["Design", "Development", "Back-End", "Marketing"];
 
 function SkeletonRow() {
   return (
@@ -137,49 +84,85 @@ export function ProjectsTable() {
   const { data, isPending } = useProjects();
   const projects = data ?? [];
 
-  const [selected, setSelected] = useState<Set<string>>(new Set());
-  const [page, setPage] = useState(2);
+  const [sorting, setSorting] = useState<SortingState>([]);
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [pagination, setPagination] = useState<PaginationState>({
+    pageIndex: 0,
+    pageSize: PAGE_SIZE,
+  });
 
-  const allSelected =
-    projects.length > 0 && projects.every((p) => selected.has(p.id));
+  // TanStack Table manages its own state internally; the React Compiler lint
+  // rule flags its return value as non-memoizable, which is expected here.
+  // eslint-disable-next-line react-hooks/incompatible-library
+  const table = useReactTable({
+    data: projects,
+    columns: projectsColumns,
+    // Key rows by project id so selection survives paging/sorting/filtering.
+    getRowId: (project) => project.id,
+    state: { sorting, columnFilters, rowSelection, pagination },
+    onSortingChange: setSorting,
+    onColumnFiltersChange: setColumnFilters,
+    onRowSelectionChange: setRowSelection,
+    onPaginationChange: setPagination,
+    enableRowSelection: true,
+    getCoreRowModel: getCoreRowModel(),
+    getSortedRowModel: getSortedRowModel(),
+    getFilteredRowModel: getFilteredRowModel(),
+    getPaginationRowModel: getPaginationRowModel(),
+  });
 
-  function toggleRow(id: string) {
-    setSelected((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
+  const teamColumn = table.getColumn("team");
+  const teamFilter =
+    (teamColumn?.getFilterValue() as ProjectTeam | undefined) ?? "all";
+
+  function selectTeam(value: string) {
+    teamColumn?.setFilterValue(value === "all" ? undefined : value);
+    table.setPageIndex(0); // jump back to the first page of the new result set
   }
 
-  function toggleAll() {
-    setSelected((prev) =>
-      prev.size === projects.length && projects.length > 0
-        ? new Set()
-        : new Set(projects.map((p) => p.id)),
-    );
-  }
+  const pageCount = Math.max(table.getPageCount(), 1);
+  const currentPage = table.getState().pagination.pageIndex + 1;
+  const selectedCount = table.getFilteredSelectedRowModel().rows.length;
 
   return (
     <div className="overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-black/5">
       <div className="flex items-start justify-between gap-4 p-6 pb-2">
         <div>
-          <h2 className="text-brand-title text-xl font-semibold tracking-tight">
+          <h2 className="text-xl font-semibold tracking-tight text-brand-title">
             Projects
           </h2>
           <div className="mt-1 flex items-center gap-2">
             <span className="size-2 rounded-full bg-brand-green" aria-hidden />
-            <span className="text-brand-body text-sm">30 done this month</span>
+            <span className="text-sm text-brand-body">30 done this month</span>
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" size="sm">
-            <SlidersHorizontal />
-            Filter
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                <SlidersHorizontal />
+                {teamFilter === "all" ? "Filter" : teamFilter}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-44">
+              <DropdownMenuLabel>Filter by team</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuRadioGroup
+                value={teamFilter}
+                onValueChange={selectTeam}
+              >
+                <DropdownMenuRadioItem value="all">
+                  All teams
+                </DropdownMenuRadioItem>
+                {TEAMS.map((team) => (
+                  <DropdownMenuRadioItem key={team} value={team}>
+                    {team}
+                  </DropdownMenuRadioItem>
+                ))}
+              </DropdownMenuRadioGroup>
+            </DropdownMenuContent>
+          </DropdownMenu>
           <Button
             variant="default"
             size="sm"
@@ -194,50 +177,88 @@ export function ProjectsTable() {
       <div className="overflow-x-auto">
         <Table>
           <TableHeader>
-            <TableRow>
-              <TableHead className="pl-6">
-                <Checkbox
-                  checked={allSelected}
-                  onCheckedChange={toggleAll}
-                  aria-label="Select all projects"
-                  disabled={isPending}
-                />
-              </TableHead>
-              <TableHead className={HEAD_CLASS}>Companies</TableHead>
-              <TableHead className={HEAD_CLASS}>Members</TableHead>
-              <TableHead className={HEAD_CLASS}>Budget</TableHead>
-              <TableHead className={HEAD_CLASS}>Team</TableHead>
-              <TableHead className={`${HEAD_CLASS} pr-6`}>Completion</TableHead>
-            </TableRow>
+            {table.getHeaderGroups().map((headerGroup) => (
+              <TableRow key={headerGroup.id}>
+                {headerGroup.headers.map((header, index) => (
+                  <TableHead
+                    key={header.id}
+                    className={cn(
+                      index === 0 && "pl-6",
+                      index === headerGroup.headers.length - 1 && "pr-6",
+                    )}
+                  >
+                    {header.isPlaceholder
+                      ? null
+                      : flexRender(
+                          header.column.columnDef.header,
+                          header.getContext(),
+                        )}
+                  </TableHead>
+                ))}
+              </TableRow>
+            ))}
           </TableHeader>
           <TableBody>
-            {isPending
-              ? Array.from({ length: 5 }).map((_, index) => (
-                  <SkeletonRow key={index} />
-                ))
-              : projects.map((project) => (
-                  <ProjectRow
-                    key={project.id}
-                    project={project}
-                    selected={selected.has(project.id)}
-                    onToggle={toggleRow}
-                  />
-                ))}
+            {isPending ? (
+              Array.from({ length: PAGE_SIZE }).map((_, index) => (
+                <SkeletonRow key={index} />
+              ))
+            ) : table.getRowModel().rows.length ? (
+              table.getRowModel().rows.map((row) => (
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() ? "selected" : undefined}
+                >
+                  {row.getVisibleCells().map((cell, index) => (
+                    <TableCell
+                      key={cell.id}
+                      className={cn(
+                        index === 0 && "pl-6",
+                        index === row.getVisibleCells().length - 1 && "pr-6",
+                      )}
+                    >
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext(),
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan={projectsColumns.length}
+                  className="h-24 px-6 text-center text-sm text-brand-body"
+                >
+                  No projects match this filter.
+                </TableCell>
+              </TableRow>
+            )}
           </TableBody>
         </Table>
       </div>
 
       <footer className="flex items-center justify-between border-t border-brand-hairline p-6 pt-4">
-        <p className="text-brand-body text-sm">
-          Page <span className="text-brand-title font-semibold">{page}</span> of
-          10
+        <p className="text-sm text-brand-body">
+          {selectedCount > 0 && (
+            <>
+              <span className="font-semibold text-brand-title">
+                {selectedCount}
+              </span>{" "}
+              selected ·{" "}
+            </>
+          )}
+          Page{" "}
+          <span className="font-semibold text-brand-title">{currentPage}</span>{" "}
+          of {pageCount}
         </p>
         <div className="flex items-center gap-2">
           <Button
             variant="outline"
             size="sm"
-            disabled={page <= 1}
-            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            disabled={!table.getCanPreviousPage()}
+            onClick={() => table.previousPage()}
           >
             <ChevronLeft />
             Prev
@@ -245,8 +266,8 @@ export function ProjectsTable() {
           <Button
             variant="outline"
             size="sm"
-            disabled={page >= 10}
-            onClick={() => setPage((p) => Math.min(10, p + 1))}
+            disabled={!table.getCanNextPage()}
+            onClick={() => table.nextPage()}
           >
             Next
             <ChevronRight />

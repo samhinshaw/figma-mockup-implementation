@@ -35,23 +35,23 @@ Other scripts:
 
 ## Tech stack
 
-| Concern              | Choice                                                      |
-| -------------------- | ----------------------------------------------------------- |
-| Build / dev server   | **Vite 6** + `@vitejs/plugin-react`                         |
-| Language             | **TypeScript** (strict), `@/*` path alias → `src/*`         |
-| UI runtime           | **React 19**                                                |
-| Styling              | **Tailwind CSS v4** (via `@tailwindcss/vite`)               |
-| Component library    | **shadcn/ui** (`radix-nova` preset, neutral, CSS variables) |
-| Extra components     | **DiceUI** (composable shadcn-style data components)        |
-| Primitives           | **Radix UI** (`radix-ui` unified package)                   |
-| Data fetching        | **TanStack Query** (React Query) over a local mock layer    |
-| Routing              | **TanStack Router**                                         |
-| Tables               | **TanStack Table** (Projects table — paging/sort/filter)    |
-| Forms + validation   | **TanStack Form** + **Zod**                                 |
-| Client state         | **Zustand**                                                 |
-| Charts               | **Recharts** (shadcn charts) + **Visx** (custom viz)        |
+| Concern              | Choice                                                         |
+| -------------------- | -------------------------------------------------------------- |
+| Build / dev server   | **Vite 6** + `@vitejs/plugin-react`                            |
+| Language             | **TypeScript** (strict), `@/*` path alias → `src/*`            |
+| UI runtime           | **React 19**                                                   |
+| Styling              | **Tailwind CSS v4** (via `@tailwindcss/vite`)                  |
+| Component library    | **shadcn/ui** (`radix-nova` preset, neutral, CSS variables)    |
+| Extra components     | **DiceUI** (composable shadcn-style data components)           |
+| Primitives           | **Radix UI** (`radix-ui` unified package)                      |
+| Data fetching        | **TanStack Query** (React Query) over a local mock layer       |
+| Routing              | **TanStack Router**                                            |
+| Tables               | **TanStack Table** (Projects table — paging/sort/filter)       |
+| Forms + validation   | **TanStack Form** + **Zod**                                    |
+| Client state         | **Zustand**                                                    |
+| Charts               | **Recharts** (shadcn charts) + **Visx** (custom viz)           |
 | Avatars              | **DiceBear** (`personas`) — offline, deterministic SVG avatars |
-| Linting / formatting | **ESLint** + **Prettier**                                   |
+| Linting / formatting | **ESLint** + **Prettier**                                      |
 
 Stack decisions (resolved with the requester):
 
@@ -95,21 +95,21 @@ eslint.config.js    # ESLint flat config
 ## The Dashboard
 
 The page (`src/routes/index.tsx`) renders inside a responsive **app shell**
-(`components/layout/`): a sticky sidebar on desktop that collapses to a hamburger
-+ slide-in drawer on mobile, with the content in a rounded white panel. Sections,
-top to bottom:
+(`components/layout/`): a sticky sidebar on desktop that collapses to a hamburger +
+slide-in drawer on mobile, with the content in a rounded white panel. Sections, top
+to bottom:
 
-| Section | Component | Notes |
-| ------- | --------- | ----- |
-| **Sidebar** | `app-sidebar.tsx` | Active **Dashboard** pill, nav groups, _Auth Pages_, Documentation — all dummy `#` links |
-| **"Build Amazing Teams"** hero | `hero-card.tsx` | Dark grainy banner, glassy CTA, overlapping cluster of illustrated avatars |
-| **Stat cards** ×3 | `stat-card.tsx` + `mini-bar-chart.tsx` | Website View / Daily Sales / Completed Tasks — 7-bar charts with one highlighted day |
-| **Orders Overview** | `orders-overview-card.tsx` | List card (bell / cart items) + a green trend badge |
-| **Projects** table | `projects-table.tsx` + `projects-columns.tsx` | TanStack Table: brand logos, member avatar groups, budget, team badges, completion bars, row selection, client-side paging + sortable columns + team filter |
-| **Sales vs Expenses** | `sales-expenses-chart.tsx` | Area chart, `$87,982.80` headline |
-| **User Activity** | `user-activity-chart.tsx` | Dual line chart |
-| **Traffic Sources** | `traffic-sources-chart.tsx` | Donut chart |
-| **Quarterly Performance** | `quarterly-performance-chart.tsx` | Grouped bar chart |
+| Section                        | Component                                     | Notes                                                                                                                                                       |
+| ------------------------------ | --------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Sidebar**                    | `app-sidebar.tsx`                             | Active **Dashboard** pill, nav groups, _Auth Pages_, Documentation — all dummy `#` links                                                                    |
+| **"Build Amazing Teams"** hero | `hero-card.tsx`                               | Dark grainy banner, glassy CTA, overlapping cluster of illustrated avatars                                                                                  |
+| **Stat cards** ×3              | `stat-card.tsx` + `mini-bar-chart.tsx`        | Website View / Daily Sales / Completed Tasks — 7-bar charts with one highlighted day                                                                        |
+| **Orders Overview**            | `orders-overview-card.tsx`                    | List card (bell / cart items) + a green trend badge                                                                                                         |
+| **Projects** table             | `projects-table.tsx` + `projects-columns.tsx` | TanStack Table: brand logos, member avatar groups, budget, team badges, completion bars, row selection, client-side paging + sortable columns + team filter |
+| **Sales vs Expenses**          | `sales-expenses-chart.tsx`                    | Area chart, `$87,982.80` headline                                                                                                                           |
+| **User Activity**              | `user-activity-chart.tsx`                     | Dual line chart                                                                                                                                             |
+| **Traffic Sources**            | `traffic-sources-chart.tsx`                   | Donut chart                                                                                                                                                 |
+| **Quarterly Performance**      | `quarterly-performance-chart.tsx`             | Grouped bar chart                                                                                                                                           |
 
 Charts use **Recharts** via the shadcn `chart` wrapper; entry animations are
 disabled (the page has its own staggered section reveal). Colors, radii, fonts,
@@ -166,9 +166,9 @@ Progress is committed incrementally. See git history for each step.
     `lib/format.ts`, `lib/avatars.ts` (DiceBear); `components/brand-logos.tsx`;
     a `ui/checkbox.tsx` primitive.
   - **Sections** — `components/layout/` (responsive `app-shell` + `app-sidebar`
-    + `page-footer`) and `components/dashboard/` (hero, stat cards, orders,
-    projects table, four Recharts charts, and the `stat-cards-row` / `charts-grid`
-    composers). `__root.tsx` mounts the shell; `index.tsx` composes the sections
-    with a staggered entrance.
+    - `page-footer`) and `components/dashboard/` (hero, stat cards, orders,
+      projects table, four Recharts charts, and the `stat-cards-row` / `charts-grid`
+      composers). `__root.tsx` mounts the shell; `index.tsx` composes the sections
+      with a staggered entrance.
   - **Added dep** — `@dicebear/core` + `@dicebear/collection` for offline,
     deterministic avatars.

@@ -42,5 +42,13 @@ export default tseslint.config(
       "react-refresh/only-export-components": "off",
     },
   },
+  // Column-definition modules export a ColumnDef array (data) alongside the
+  // header/cell render helpers they embed — not a fast-refreshable component module.
+  {
+    files: ["src/components/**/*-columns.tsx"],
+    rules: {
+      "react-refresh/only-export-components": "off",
+    },
+  },
   prettier,
 );
