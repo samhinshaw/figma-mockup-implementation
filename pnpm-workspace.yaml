@@ -1,5 +1,10 @@
-# pnpm settings. Approve dependency build scripts here (pnpm 10+ blocks them by
-# default). esbuild ships its binary via a platform package, so its build script
-# is optional, but approving it keeps installs warning-free.
-onlyBuiltDependencies:
-  - esbuild
+# pnpm 11 dependency build-script approvals. pnpm blocks postinstall scripts by
+# default and asks you to approve each one (true) or decline it (false). Leaving
+# an entry unresolved makes `pnpm dev`'s pre-run dependency check fail, so these
+# are set explicitly.
+#   - esbuild: Vite's bundler/transformer — approve its install script.
+#   - msw: a transitive dep we don't use at runtime — its service-worker copy
+#     script isn't needed.
+allowBuilds:
+  esbuild: true
+  msw: false
