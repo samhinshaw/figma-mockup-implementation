@@ -1,28 +1,41 @@
+import type { ReactNode } from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Button } from "@/components/ui/button";
+
+import { HeroCard } from "@/components/dashboard/hero-card";
+import { StatCardsRow } from "@/components/dashboard/stat-cards-row";
+import { ProjectsTable } from "@/components/dashboard/projects-table";
+import { ChartsGrid } from "@/components/dashboard/charts-grid";
 
 export const Route = createFileRoute("/")({
-  component: DashboardPlaceholder,
+  component: DashboardPage,
 });
 
-/**
- * Placeholder landing. Replace with the real Dashboard during implementation
- * (sidebar, hero, stat cards, projects table, charts) — see README.
- */
-function DashboardPlaceholder() {
+function Reveal({ index, children }: { index: number; children: ReactNode }) {
   return (
-    <main className="grid min-h-svh place-items-center bg-background text-foreground">
-      <div className="text-center">
-        <p className="text-sm font-medium tracking-wide text-muted-foreground uppercase">
-          Material Dashboard · Scaffold
-        </p>
-        <h1 className="mt-2 text-3xl font-semibold">Ready to build 🛠️</h1>
-        <p className="mt-2 text-muted-foreground">
-          Stack is wired up. Start implementing in{" "}
-          <code className="rounded bg-muted px-1.5 py-0.5 text-sm">src/</code>.
-        </p>
-        <Button className="mt-6">shadcn/ui Button works</Button>
-      </div>
-    </main>
+    <div
+      className="motion-safe:animate-in motion-safe:fade-in motion-safe:slide-in-from-bottom-3 motion-safe:duration-500"
+      style={{ animationFillMode: "both", animationDelay: index * 90 + "ms" }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function DashboardPage() {
+  return (
+    <>
+      <Reveal index={0}>
+        <HeroCard />
+      </Reveal>
+      <Reveal index={1}>
+        <StatCardsRow />
+      </Reveal>
+      <Reveal index={2}>
+        <ProjectsTable />
+      </Reveal>
+      <Reveal index={3}>
+        <ChartsGrid />
+      </Reveal>
+    </>
   );
 }
