@@ -129,3 +129,15 @@ Progress is committed incrementally. See git history for each step.
 - **Tailwind CSS v4** — `@tailwindcss/vite`, `src/styles/globals.css`.
 - **shadcn/ui** — `radix-nova` preset, neutral base, CSS variables; core
   components generated into `src/components/ui/`.
+- **DiceUI** — added via its shadcn registry (`combobox` as a starter).
+- **Data / state** — TanStack Query (provider in `main.tsx`), Zustand store
+  (`src/stores/ui.ts`), Zod.
+- **Routing** — TanStack Router (file-based via `@tanstack/router-plugin`).
+  Routes live in `src/routes/`; `src/routeTree.gen.ts` is generated (committed).
+  Router + Query devtools are mounted in dev only.
+- **GraphQL** — graphql-request client (`src/lib/graphql.ts`) + GraphQL Code
+  Generator (`codegen.ts`, client preset). Sample `schema.graphql` +
+  `src/graphql/operations/dashboard.graphql` → `pnpm codegen` →
+  `src/graphql/generated/`.
+- **Tables / forms** — TanStack Table, TanStack Form (with Zod).
+- **Charts** — shadcn `chart` (Recharts) component; Visx packages installed.

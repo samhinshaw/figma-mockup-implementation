@@ -1,11 +1,15 @@
+import { createFileRoute } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 
+export const Route = createFileRoute("/")({
+  component: DashboardPlaceholder,
+});
+
 /**
- * Placeholder app shell. The real Dashboard (sidebar, hero, stat cards,
- * projects table, charts) gets built during implementation — see README.
- * This page only exists to prove the toolchain renders.
+ * Placeholder landing. Replace with the real Dashboard during implementation
+ * (sidebar, hero, stat cards, projects table, charts) — see README.
  */
-export function App() {
+function DashboardPlaceholder() {
   return (
     <main className="grid min-h-svh place-items-center bg-background text-foreground">
       <div className="text-center">
