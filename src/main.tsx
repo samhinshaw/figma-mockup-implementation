@@ -15,22 +15,10 @@ declare module "@tanstack/react-router" {
   }
 }
 
-/**
- * Start the MSW mock worker when VITE_ENABLE_MOCKS is set. The dynamic import
- * keeps MSW (and the fixtures) out of the production bundle when mocks are off.
- */
-async function enableMocking() {
-  if (import.meta.env.VITE_ENABLE_MOCKS !== "true") return;
-  const { worker } = await import("./mocks/browser");
-  await worker.start({ onUnhandledRequest: "bypass" });
-}
-
-enableMocking().then(() => {
-  createRoot(document.getElementById("root")!).render(
-    <StrictMode>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-      </QueryClientProvider>
-    </StrictMode>,
-  );
-});
+createRoot(document.getElementById("root")!).render(
+  <StrictMode>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+    </QueryClientProvider>
+  </StrictMode>,
+);

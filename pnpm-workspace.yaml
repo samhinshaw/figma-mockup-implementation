@@ -3,8 +3,5 @@
 # an entry unresolved makes `pnpm dev`'s pre-run dependency check fail, so these
 # are set explicitly.
 #   - esbuild: Vite's bundler/transformer — approve its install script.
-#   - msw: a transitive dep we don't use at runtime — its service-worker copy
-#     script isn't needed.
 allowBuilds:
   esbuild: true
-  msw: false

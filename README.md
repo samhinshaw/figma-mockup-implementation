@@ -23,52 +23,45 @@ pnpm dev          # Vite dev server  → http://localhost:5173
 
 Other scripts:
 
-| Script                 | What it does                                            |
-| ---------------------- | ------------------------------------------------------- |
-| `pnpm dev`             | Start the Vite dev server                               |
-| `pnpm build`           | Type-check (`tsc -b`) then production build with Vite   |
-| `pnpm preview`         | Preview the production build                            |
-| `pnpm lint`            | Run ESLint                                              |
-| `pnpm format`          | Format with Prettier                                    |
-| `pnpm codegen`         | Generate typed GraphQL operations (see GraphQL section) |
-| `pnpm storybook`       | Run Storybook on port 6006                              |
-| `pnpm build-storybook` | Build the static Storybook                              |
+| Script         | What it does                                          |
+| -------------- | ----------------------------------------------------- |
+| `pnpm dev`     | Start the Vite dev server                             |
+| `pnpm build`   | Type-check (`tsc -b`) then production build with Vite |
+| `pnpm preview` | Preview the production build                          |
+| `pnpm lint`    | Run ESLint                                            |
+| `pnpm format`  | Format with Prettier                                  |
 
 ---
 
 ## Tech stack
 
-| Concern              | Choice                                                              |
-| -------------------- | ------------------------------------------------------------------- |
-| Build / dev server   | **Vite 6** + `@vitejs/plugin-react`                                 |
-| Language             | **TypeScript** (strict), `@/*` path alias → `src/*`                 |
-| UI runtime           | **React 19**                                                        |
-| Styling              | **Tailwind CSS v4** (via `@tailwindcss/vite`)                       |
-| Component library    | **shadcn/ui** (`radix-nova` preset, neutral, CSS variables)         |
-| Extra components     | **DiceUI** (composable shadcn-style data components)                |
-| Primitives           | **Radix UI** (`radix-ui` unified package)                           |
-| Data fetching        | **TanStack Query** (React Query)                                    |
-| GraphQL              | **graphql-request** client + **GraphQL Code Generator** (typed ops) |
-| Mock backend         | **MSW** (Mock Service Worker) — intercepts GraphQL in the browser   |
-| Routing              | **TanStack Router**                                                 |
-| Tables               | **TanStack Table**                                                  |
-| Forms + validation   | **TanStack Form** + **Zod**                                         |
-| Client state         | **Zustand**                                                         |
-| Charts               | **Recharts** (shadcn charts) + **Visx** (custom viz)                |
-| Avatars              | **DiceBear** (`personas`) — offline, deterministic SVG avatars      |
-| Component workshop   | **Storybook** (react-vite builder)                                  |
-| Linting / formatting | **ESLint** + **Prettier**                                           |
+| Concern              | Choice                                                      |
+| -------------------- | ----------------------------------------------------------- |
+| Build / dev server   | **Vite 6** + `@vitejs/plugin-react`                         |
+| Language             | **TypeScript** (strict), `@/*` path alias → `src/*`         |
+| UI runtime           | **React 19**                                                |
+| Styling              | **Tailwind CSS v4** (via `@tailwindcss/vite`)               |
+| Component library    | **shadcn/ui** (`radix-nova` preset, neutral, CSS variables) |
+| Extra components     | **DiceUI** (composable shadcn-style data components)        |
+| Primitives           | **Radix UI** (`radix-ui` unified package)                   |
+| Data fetching        | **TanStack Query** (React Query) over a local mock layer    |
+| Routing              | **TanStack Router**                                         |
+| Tables               | **TanStack Table** (Projects table — paging/sort/filter)    |
+| Forms + validation   | **TanStack Form** + **Zod**                                 |
+| Client state         | **Zustand**                                                 |
+| Charts               | **Recharts** (shadcn charts) + **Visx** (custom viz)        |
+| Avatars              | **DiceBear** (`personas`) — offline, deterministic SVG avatars |
+| Linting / formatting | **ESLint** + **Prettier**                                   |
 
 Stack decisions (resolved with the requester):
 
 - **dice/ui → DiceUI** (diceui.com) — installed alongside shadcn/ui.
 - **Recharts + Visx** — both; Recharts for the standard dashboard charts,
   Visx kept available for bespoke visualizations.
-- **GraphQL — mocked, no live server** — a sample `schema.graphql` lets
-  `pnpm codegen` produce typed operations offline, and **MSW** stands in for the
-  backend so the real graphql-request → TanStack Query path runs end to end
-  (genuine loading/error/refetch states) with no server. Point it at a real
-  endpoint when one exists. See "Mock backend" below.
+- **Data — local mock, no live server.** Every section renders from typed
+  fixtures in `src/data/` served through TanStack Query hooks with a small
+  artificial latency (so loading skeletons are real). No API client and no
+  backend — wire the hooks to a real API when one exists.
 - **TanStack** — Router + Table + Form (React Query is "TanStack Query").
 
 ---
@@ -82,30 +75,20 @@ src/
     brand-logos.tsx # inline SVG brand marks (Figma/GitHub/Discord/Slack) for the projects table
     layout/         # app shell — app-shell.tsx, app-sidebar.tsx, page-footer.tsx
     dashboard/      # Dashboard sections — hero-card, stat-card + mini-bar-chart,
-                    #   orders-overview-card, projects-table, the four *-chart components,
-                    #   and the stat-cards-row / charts-grid composers
+                    #   orders-overview-card, projects-table (+ projects-columns), the four
+                    #   *-chart components, and the stat-cards-row / charts-grid composers
   data/             # FRONTEND mock layer (no real API):
                     #   types.ts (models) · mock.ts (fixtures) · queries.ts (TanStack Query hooks)
   routes/           # TanStack Router — __root.tsx wraps <AppShell>, index.tsx = the Dashboard page
-  lib/              # cn() · format.ts (currency/number) · avatars.ts (DiceBear) · graphql client · query client
-  graphql/          # .graphql operations + generated/ types — NOT used by the page (kept for a real API)
-  mocks/            # MSW mock backend — NOT used by the page (kept for a real GraphQL API)
+  lib/              # cn() · format.ts (currency/number) · avatars.ts (DiceBear) · query client
   stores/           # Zustand — ui.ts (sidebar drawer state)
   styles/
     globals.css     # Tailwind v4 entry + theme tokens + brand design tokens (from the Figma variables)
   main.tsx          # React entry (Query + Router providers)
   routeTree.gen.ts  # generated by the router plugin
 components.json     # shadcn/ui config
-codegen.ts          # GraphQL Code Generator config
 eslint.config.js    # ESLint flat config
-.storybook/         # Storybook config
 ```
-
-> **Two data paths, deliberately.** The Dashboard renders from the simple
-> `src/data/` mock layer (typed fixtures served through TanStack Query hooks with
-> a small artificial latency, so loading skeletons are real). The
-> `src/graphql/` + `src/mocks/` (MSW) scaffold is left intact but unused by the
-> page — wire the sections to it when a real API exists.
 
 ---
 
@@ -122,7 +105,7 @@ top to bottom:
 | **"Build Amazing Teams"** hero | `hero-card.tsx` | Dark grainy banner, glassy CTA, overlapping cluster of illustrated avatars |
 | **Stat cards** ×3 | `stat-card.tsx` + `mini-bar-chart.tsx` | Website View / Daily Sales / Completed Tasks — 7-bar charts with one highlighted day |
 | **Orders Overview** | `orders-overview-card.tsx` | List card (bell / cart items) + a green trend badge |
-| **Projects** table | `projects-table.tsx` | Brand logos, member avatar groups, budget, team badges, completion bars, row selection + pagination |
+| **Projects** table | `projects-table.tsx` + `projects-columns.tsx` | TanStack Table: brand logos, member avatar groups, budget, team badges, completion bars, row selection, client-side paging + sortable columns + team filter |
 | **Sales vs Expenses** | `sales-expenses-chart.tsx` | Area chart, `$87,982.80` headline |
 | **User Activity** | `user-activity-chart.tsx` | Dual line chart |
 | **Traffic Sources** | `traffic-sources-chart.tsx` | Donut chart |
@@ -143,6 +126,10 @@ and added to `src/styles/globals.css` (`--brand-*`).
   …). Each resolves its fixture after a short, slightly staggered delay so the
   loading → reveal experience is real. **Edit `mock.ts` to change what the page
   shows.**
+- **Projects table.** Built on **TanStack Table** (`projects-columns.tsx` defines
+  the columns; `projects-table.tsx` wires the instance). All 48 mock projects load
+  once, then paging (5/page), column sorting, team filtering, and row selection
+  run client-side via TanStack Table's row models.
 - **Smart vs. presentational.** Section components (hero, charts, table, the
   rows) call their own query hook and render their own skeleton; small pieces
   (`stat-card`, `mini-bar-chart`, `orders-overview-card`, `brand-logos`) are pure
@@ -150,7 +137,6 @@ and added to `src/styles/globals.css` (`--brand-*`).
 - **Avatars** are generated offline and deterministically with **DiceBear**
   (`@dicebear/*`, `personas` style) via `src/lib/avatars.ts` — same seed → same
   face, no network.
-- **Develop components in isolation** with `pnpm storybook`.
 
 ---
 
@@ -164,40 +150,16 @@ Progress is committed incrementally. See git history for each step.
   components generated into `src/components/ui/`.
 - **DiceUI** — added via its shadcn registry (`combobox` as a starter).
 - **Data / state** — TanStack Query (provider in `main.tsx`), Zustand store
-  (`src/stores/ui.ts`), Zod.
+  (`src/stores/ui.ts`), Zod. The data layer is local mock fixtures only.
 - **Routing** — TanStack Router (file-based via `@tanstack/router-plugin`).
   Routes live in `src/routes/`; `src/routeTree.gen.ts` is generated (committed).
   Router + Query devtools are mounted in dev only.
-- **GraphQL** — graphql-request client (`src/lib/graphql.ts`) + GraphQL Code
-  Generator (`codegen.ts`, client preset). Sample `schema.graphql` +
-  `src/graphql/operations/dashboard.graphql` → `pnpm codegen` →
-  `src/graphql/generated/`.
-- **Mock backend (MSW)** — `src/mocks/` holds the in-browser mock that stands in
-  for a real GraphQL server, so nothing else in the data layer changes:
-  - `fixtures.ts` — canned data, typed as the generated `DashboardOverviewQuery`
-    (so it can't drift from the schema). **Edit this to change what the app shows.**
-  - `handlers.ts` — matches by GraphQL operation name and returns the fixture
-    after a small `delay()` (makes loading states visible).
-  - `browser.ts` — `setupWorker(...)`; `public/mockServiceWorker.js` is the
-    generated Service Worker (regenerate with `npx msw init public/`).
-  - Started by `enableMocking()` in `main.tsx`, gated on `VITE_ENABLE_MOCKS`
-    (dynamic import keeps MSW out of production builds). The flag is set to
-    `true` in the committed `.env.development`, so **`pnpm dev` serves mocked
-    data out of the box**. Unset it (or override in `.env.local`) to talk to a
-    real `VITE_GRAPHQL_ENDPOINT`. Add a query: write the operation → `pnpm
-    codegen` → add one handler.
-- **Tables / forms** — TanStack Table, TanStack Form (with Zod).
+- **Tables / forms** — TanStack Table (drives the Projects table), TanStack Form
+  (with Zod).
 - **Charts** — shadcn `chart` (Recharts) component; Visx packages installed.
 - **Lint / format** — ESLint flat config (typescript-eslint, react-hooks,
   react-refresh) + Prettier (with Tailwind class sorting). `pnpm lint` clean;
   `pnpm format` normalizes the tree.
-- **Storybook** — Storybook 10, `@storybook/tanstack-react` framework, with the
-  a11y + docs addons. Config in `.storybook/`; global styles are loaded in
-  `preview.tsx` so stories are Tailwind-styled. Sample story at
-  `src/components/ui/button.stories.tsx`. `pnpm build-storybook` verified.
-  (The default init's Vitest + Playwright browser-test layer was removed to keep
-  the scaffold lean — add it back with `pnpm dlx storybook add @storybook/addon-vitest`
-  if you want component testing.)
 - **Dashboard page** — the full Material-Shadcn Dashboard, recreated from Figma.
   - **Foundation** — `--brand-*` design tokens + hero grain in `globals.css`;
     `src/data/` mock layer (types + fixtures + per-section TanStack Query hooks);
@@ -210,5 +172,3 @@ Progress is committed incrementally. See git history for each step.
     with a staggered entrance.
   - **Added dep** — `@dicebear/core` + `@dicebear/collection` for offline,
     deterministic avatars.
-  - Verified: `pnpm exec tsc -b`, `pnpm lint` (0 warnings), and `pnpm build` all
-    pass; spot-checked in the browser at desktop and mobile widths.

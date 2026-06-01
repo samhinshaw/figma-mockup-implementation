@@ -13,10 +13,7 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "lint": "eslint .",
-    "format": "prettier --write .",
-    "codegen": "graphql-codegen --config codegen.ts",
-    "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "format": "prettier --write ."
   },
   "dependencies": {
     "@dicebear/collection": "^9.4.2",
@@ -27,7 +24,6 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@fontsource-variable/geist": "^5.2.9",
-    "@graphql-typed-document-node/core": "^3.2.0",
     "@tanstack/react-form": "^1.33.0",
     "@tanstack/react-query": "^5.100.14",
     "@tanstack/react-router": "^1.170.10",
@@ -40,8 +36,6 @@
     "@visx/tooltip": "^3.12.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "graphql": "^16.14.0",
-    "graphql-request": "^7.4.0",
     "lucide-react": "^1.17.0",
     "next-themes": "^0.4.6",
     "radix-ui": "^1.4.3",
@@ -57,11 +51,6 @@
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
-    "@graphql-codegen/cli": "^7.1.1",
-    "@graphql-codegen/client-preset": "^6.0.1",
-    "@storybook/addon-a11y": "^10.4.1",
-    "@storybook/addon-docs": "^10.4.1",
-    "@storybook/tanstack-react": "^10.4.1",
     "@tailwindcss/vite": "^4.3.0",
     "@tanstack/react-query-devtools": "^5.100.14",
     "@tanstack/react-router-devtools": "^1.167.0",
@@ -74,20 +63,12 @@
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.2",
-    "eslint-plugin-storybook": "^10.4.1",
     "globals": "^17.6.0",
-    "msw": "^2.14.6",
     "prettier": "^3.8.3",
     "prettier-plugin-tailwindcss": "^0.8.0",
-    "storybook": "^10.4.1",
     "tailwindcss": "^4.3.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.60.0",
     "vite": "^6.4.2"
-  },
-  "msw": {
-    "workerDirectory": [
-      "public"
-    ]
   }
 }
