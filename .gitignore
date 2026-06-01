@@ -36,6 +36,8 @@ lerna-debug.log*
 .env
 .env.*
 !.env.example
+# Committed, non-secret dev defaults (turns the MSW mock backend on for `pnpm dev`)
+!.env.development
 
 # Editor / OS
 .vscode/*

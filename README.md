@@ -46,6 +46,7 @@ Other scripts:
 | Primitives           | **Radix UI** (`radix-ui` unified package)                           |
 | Data fetching        | **TanStack Query** (React Query)                                    |
 | GraphQL              | **graphql-request** client + **GraphQL Code Generator** (typed ops) |
+| Mock backend         | **MSW** (Mock Service Worker) — intercepts GraphQL in the browser   |
 | Routing              | **TanStack Router**                                                 |
 | Tables               | **TanStack Table**                                                  |
 | Forms + validation   | **TanStack Form** + **Zod**                                         |
@@ -59,9 +60,11 @@ Stack decisions (resolved with the requester):
 - **dice/ui → DiceUI** (diceui.com) — installed alongside shadcn/ui.
 - **Recharts + Visx** — both; Recharts for the standard dashboard charts,
   Visx kept available for bespoke visualizations.
-- **GraphQL — tooling only** — no live backend. A sample `schema.graphql`
-  lets `pnpm codegen` produce typed operations offline; point it at a real
-  endpoint when one exists.
+- **GraphQL — mocked, no live server** — a sample `schema.graphql` lets
+  `pnpm codegen` produce typed operations offline, and **MSW** stands in for the
+  backend so the real graphql-request → TanStack Query path runs end to end
+  (genuine loading/error/refetch states) with no server. Point it at a real
+  endpoint when one exists. See "Mock backend" below.
 - **TanStack** — Router + Table + Form (React Query is "TanStack Query").
 
 ---
@@ -78,6 +81,7 @@ src/
   routes/        # TanStack Router route tree (__root.tsx, index.tsx)
   lib/           # cn() util, graphql client, query client
   graphql/       # .graphql operations + generated/ types
+  mocks/         # MSW mock backend: fixtures, handlers, worker setup
   stores/        # Zustand stores
   hooks/         # shared hooks
   styles/
@@ -143,6 +147,20 @@ Progress is committed incrementally. See git history for each step.
   Generator (`codegen.ts`, client preset). Sample `schema.graphql` +
   `src/graphql/operations/dashboard.graphql` → `pnpm codegen` →
   `src/graphql/generated/`.
+- **Mock backend (MSW)** — `src/mocks/` holds the in-browser mock that stands in
+  for a real GraphQL server, so nothing else in the data layer changes:
+  - `fixtures.ts` — canned data, typed as the generated `DashboardOverviewQuery`
+    (so it can't drift from the schema). **Edit this to change what the app shows.**
+  - `handlers.ts` — matches by GraphQL operation name and returns the fixture
+    after a small `delay()` (makes loading states visible).
+  - `browser.ts` — `setupWorker(...)`; `public/mockServiceWorker.js` is the
+    generated Service Worker (regenerate with `npx msw init public/`).
+  - Started by `enableMocking()` in `main.tsx`, gated on `VITE_ENABLE_MOCKS`
+    (dynamic import keeps MSW out of production builds). The flag is set to
+    `true` in the committed `.env.development`, so **`pnpm dev` serves mocked
+    data out of the box**. Unset it (or override in `.env.local`) to talk to a
+    real `VITE_GRAPHQL_ENDPOINT`. Add a query: write the operation → `pnpm
+    codegen` → add one handler.
 - **Tables / forms** — TanStack Table, TanStack Form (with Zod).
 - **Charts** — shadcn `chart` (Recharts) component; Visx packages installed.
 - **Lint / format** — ESLint flat config (typescript-eslint, react-hooks,

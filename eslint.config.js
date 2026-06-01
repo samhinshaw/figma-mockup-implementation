@@ -13,6 +13,7 @@ export default tseslint.config(
       "storybook-static",
       "src/routeTree.gen.ts",
       "src/graphql/generated/**",
+      "public/mockServiceWorker.js",
     ],
   },
   {
