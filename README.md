@@ -148,3 +148,10 @@ Progress is committed incrementally. See git history for each step.
 - **Lint / format** — ESLint flat config (typescript-eslint, react-hooks,
   react-refresh) + Prettier (with Tailwind class sorting). `pnpm lint` clean;
   `pnpm format` normalizes the tree.
+- **Storybook** — Storybook 10, `@storybook/tanstack-react` framework, with the
+  a11y + docs addons. Config in `.storybook/`; global styles are loaded in
+  `preview.tsx` so stories are Tailwind-styled. Sample story at
+  `src/components/ui/button.stories.tsx`. `pnpm build-storybook` verified.
+  (The default init's Vitest + Playwright browser-test layer was removed to keep
+  the scaffold lean — add it back with `pnpm dlx storybook add @storybook/addon-vitest`
+  if you want component testing.)

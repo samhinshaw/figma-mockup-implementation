@@ -1,3 +1,5 @@
-allowBuilds:
-  esbuild: set this to true or false
-  msw: set this to true or false
+# pnpm settings. Approve dependency build scripts here (pnpm 10+ blocks them by
+# default). esbuild ships its binary via a platform package, so its build script
+# is optional, but approving it keeps installs warning-free.
+onlyBuiltDependencies:
+  - esbuild
